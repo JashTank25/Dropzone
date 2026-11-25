@@ -1,0 +1,8 @@
+{
+  "name": "DropBridge",
+  "description": "Connect. Share. Instantly. Instant real-time file sharing across devices using private room codes.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": []
+}
