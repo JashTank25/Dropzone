@@ -1,4 +1,5 @@
 import JSZip from 'jszip';
+import { buildApiUrl } from '@/src/config/env';
 import { authedFetch, ensureEphemeralSession } from '@/src/services/authService';
 import { useRoomStore } from '@/src/stores/useRoomStore';
 import {
@@ -101,7 +102,7 @@ export async function streamLocalFileToPipe(
 
   await new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', `/api/streams/${encodeURIComponent(streamId)}`, true);
+    xhr.open('POST', buildApiUrl(`/api/streams/${encodeURIComponent(streamId)}`), true);
     xhr.setRequestHeader('Authorization', `Bearer ${token}`);
     xhr.setRequestHeader('Content-Type', 'application/octet-stream');
 
@@ -183,7 +184,7 @@ export async function getSessionFileUrl(file: SharedFile): Promise<{ url: string
   if (!res.ok || !data.streamUrl) {
     throw new Error(data.error || 'Unable to connect live file stream.');
   }
-  return { url: data.streamUrl as string, revokeAfter: false };
+  return { url: buildApiUrl(data.streamUrl as string), revokeAfter: false };
 }
 
 export async function downloadSingleFile(file: SharedFile): Promise<void> {

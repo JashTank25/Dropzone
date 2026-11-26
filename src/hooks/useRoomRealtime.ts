@@ -5,6 +5,7 @@ import {
   type DirectFileHeader,
   type SignalPayload,
 } from '@/src/lib/webrtc/DirectTransferManager';
+import { buildWsUrl } from '@/src/config/env';
 import { ensureEphemeralSession } from '@/src/services/authService';
 import { streamLocalFileToPipe } from '@/src/services/fileService';
 import { fetchRoomSnapshot } from '@/src/services/roomService';
@@ -40,8 +41,9 @@ export function useRoomRealtime(roomId: string | null, memberId: string | null) 
         const { token } = await ensureEphemeralSession();
         if (cancelled) return;
 
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsUrl = `${protocol}//${window.location.host}/ws?token=${encodeURIComponent(token)}&roomId=${encodeURIComponent(roomId)}&memberId=${encodeURIComponent(memberId)}`;
+        const wsUrl = buildWsUrl(
+          `/ws?token=${encodeURIComponent(token)}&roomId=${encodeURIComponent(roomId)}&memberId=${encodeURIComponent(memberId)}`
+        );
         const ws = new WebSocket(wsUrl);
         wsRef.current = ws;
 

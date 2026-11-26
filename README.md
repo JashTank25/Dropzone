@@ -16,13 +16,24 @@ DropBridge is a responsive Progressive Web App for single-session cross-device f
 ## Local Development
 
 ```bash
-cp .env.example .env
-
 npm install
 npm run dev
 ```
 
 The Express + WebSocket + Vite dev server runs on port `3000`.
+
+## Deployment
+
+DropBridge requires a persistent Node.js server (`server.ts`) because rooms, live file stream pipes, and WebSockets (`/ws`) run in volatile server memory. Static-only hosting (such as Vercel alone without a backend) cannot handle `/api/*` POST requests or `/ws` WebSockets and will return HTTP 405.
+
+### Option 1: Single Full-Stack Host (Recommended — Render, Railway, Fly.io, Cloud Run)
+- **Build Command**: `npm install && npm run build`
+- **Start Command**: `NODE_ENV=production npm start`
+- **Environment Variables**: `PORT=3000` (or platform-injected `PORT`)
+
+### Option 2: Vercel Frontend + Separate Node.js Backend
+1. Deploy the repository as a Node web service on Render / Railway / Cloud Run using `npm run build` and `NODE_ENV=production npm start`, and set `CORS_ORIGIN=https://your-vercel-domain.vercel.app`.
+2. In your Vercel project environment variables, set `VITE_API_BASE_URL=https://your-node-backend-url` and redeploy.
 
 ## Testing & Verification
 
@@ -31,15 +42,3 @@ npm run lint
 npm test
 npm run build
 ```
-
-## Production Start
-
-```bash
-npm run build
-NODE_ENV=production npm start
-```
-
-Optional environment variables:
-- `PORT` (defaults to `3000`)
-- `VITE_MAX_FILE_SIZE_MB` (defaults to `250`)
-- `VITE_TURN_URL`, `VITE_TURN_USERNAME`, `VITE_TURN_CREDENTIAL` (optional WebRTC TURN relay)

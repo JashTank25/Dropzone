@@ -34,6 +34,7 @@ import { useClipboardPaste } from '@/src/hooks/useClipboardPaste';
 import { useDebounce } from '@/src/hooks/useDebounce';
 import { useDirectTransfer } from '@/src/hooks/useDirectTransfer';
 import { useRoomRealtime } from '@/src/hooks/useRoomRealtime';
+import { buildWsUrl } from '@/src/config/env';
 import { ensureEphemeralSession } from '@/src/services/authService';
 import {
   deleteSharedFile,
@@ -185,8 +186,9 @@ export function RoomWorkspacePage({
       try {
         const { token } = await ensureEphemeralSession();
         if (cancelled) return;
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsUrl = `${protocol}//${window.location.host}/ws?token=${encodeURIComponent(token)}&roomId=${encodeURIComponent(pendingRoomId)}&memberId=${encodeURIComponent(targetMemberId)}`;
+        const wsUrl = buildWsUrl(
+          `/ws?token=${encodeURIComponent(token)}&roomId=${encodeURIComponent(pendingRoomId)}&memberId=${encodeURIComponent(targetMemberId)}`
+        );
         ws = new WebSocket(wsUrl);
 
         ws.onmessage = async (event) => {
