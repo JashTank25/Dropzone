@@ -246,7 +246,20 @@ async function startServer() {
   app.use(express.json({ limit: '1mb' }));
 
   const server = http.createServer(app);
-  const wss = new WebSocketServer({ server, path: '/ws' });
+  const wss = new WebSocketServer({ noServer: true });
+
+  server.on('upgrade', (req, socket, head) => {
+    const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
+    if (url.pathname === '/ws') {
+      wss.handleUpgrade(req, socket, head, (ws) => {
+        wss.emit('connection', ws, req);
+      });
+      return;
+    }
+    if (IS_PROD) {
+      socket.destroy();
+    }
+  });
 
   // WebSocket real-time hub
   wss.on('connection', (ws, req) => {
@@ -1166,7 +1179,16 @@ async function startServer() {
   if (!IS_PROD) {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: {
+        middlewareMode: true,
+        allowedHosts: true,
+        hmr: process.env.ENABLE_HMR === 'true',
+        ws: {
+          server,
+          path: '/__vite_hmr',
+        },
+        watch: process.env.ENABLE_HMR === 'true' ? {} : null,
+      },
       appType: 'spa',
     });
     app.use(vite.middlewares);
